@@ -12,11 +12,17 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.2",
     "@cloudflare/workers-types": "^4.20241022.0",
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "^0.26.2",
+    "postgres": "^3.4.4",
+    "tsx": "^4.19.1",
     "typescript": "^5.5.2",
     "vitest": "2.0.5",
     "wrangler": "^3.60.3"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^0.10.1",
+    "drizzle-orm": "^0.35.3",
     "hono": "^4.6.6"
   }
 }
