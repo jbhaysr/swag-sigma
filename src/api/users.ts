@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { Context, Hono } from 'hono';
 import { friends, users } from '../db/schema';
 import { union } from 'drizzle-orm/pg-core';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 export type Env = {
 	DATABASE_URL: string;
@@ -131,6 +131,48 @@ usersApi.post('/:id/friends', async (c) => {
 			userId1: uid1,
 			userId2: uid2,
 		});
+
+		return c.json({ result });
+	} catch (error) {
+		// @TODO breakdown potential exceptions
+		return c.json(
+			{
+				error,
+			},
+			500
+		);
+	}
+});
+
+
+usersApi.delete('/:id/friends/:friendId', async (c) => {
+	try {
+		const db = database(c);
+
+		const userId = c.req.param('id') as string;
+		const friendId = c.req.param('friendId') as string;
+
+		var uid1, uid2: string;
+
+		if (friendId < userId) {
+			uid1 = friendId;
+			uid2 = userId;
+		} else if(userId < friendId) {
+			uid1 = userId;
+			uid2 = friendId;
+		} else {
+			return c.json(
+				{
+					error: "You may not befriend yourself.",
+				},
+				403
+			);
+		}
+
+		const result = await db.delete(friends).where(and(
+			eq(friends.userId1, uid1),
+			eq(friends.userId2, uid2),
+		));
 
 		return c.json({ result });
 	} catch (error) {
