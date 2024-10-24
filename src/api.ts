@@ -78,16 +78,16 @@ app.get('/users/:id/friends', async (c) => {
 			username: users.username
 		}).from(users).innerJoin(friends, eq(
 			users.id,
-			friends.user_id_1
-		)).where(eq(friends.user_id_2, user_id));
+			friends.userId1
+		)).where(eq(friends.userId2, user_id));
 
 		const friends_2 = db.select({
 			id: users.id,
 			username: users.username
 		}).from(users).innerJoin(friends, eq(
 			users.id,
-			friends.user_id_2
-		)).where(eq(friends.user_id_1, user_id));
+			friends.userId2
+		)).where(eq(friends.userId1, user_id));
 
 		const result = await union(friends_1, friends_2);
 
