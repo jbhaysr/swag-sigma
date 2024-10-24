@@ -8,8 +8,8 @@ export const users = pgTable('users', {
 });
 
 export const friends = pgTable('friends', {
-    user_id_1: uuid('user_id_1'),
-    user_id_2: uuid('user_id_2')
+    user_id_1: uuid('user_id_1').references(() => users.id),
+    user_id_2: uuid('user_id_2').references(() => users.id),
 }, (table) => ({
         pk: primaryKey({
             columns: [table.user_id_1, table.user_id_2 ]
