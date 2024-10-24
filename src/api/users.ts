@@ -2,7 +2,7 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { Context, Hono } from 'hono';
-import { friends, users } from './db/schema';
+import { friends, users } from '../db/schema';
 import { union } from 'drizzle-orm/pg-core';
 import { eq } from 'drizzle-orm';
 
@@ -10,7 +10,7 @@ export type Env = {
 	DATABASE_URL: string;
 };
 
-const app = new Hono<{ Bindings: Env }>();
+const usersApi = new Hono<{ Bindings: Env }>();
 
 const database = (c: Context) => {
 	const sql = neon(c.env.DATABASE_URL);
@@ -18,7 +18,7 @@ const database = (c: Context) => {
 	return db;
 }
 
-app.get('/users', async (c) => {
+usersApi.get('/', async (c) => {
 	try {
 		const db = database(c);
 		const result = await db.select().from(users);
@@ -35,7 +35,7 @@ app.get('/users', async (c) => {
 	}
 });
 
-app.post('/users', async (c) => {
+usersApi.post('/', async (c) => {
 	try {
 		type UserPostBody = {
 			username: string
@@ -60,7 +60,7 @@ app.post('/users', async (c) => {
 	}
 });
 
-app.get('/users/:id/friends', async (c) => {
+usersApi.get('/:id/friends', async (c) => {
 	try {
 		const userId = c.req.param('id') as string;
 		
@@ -96,7 +96,7 @@ app.get('/users/:id/friends', async (c) => {
 	}
 });
 
-app.post('/users/:id/friends', async (c) => {
+usersApi.post('/:id/friends', async (c) => {
 	try {
 		type FriendPostBody = {
 			id: string
@@ -144,4 +144,4 @@ app.post('/users/:id/friends', async (c) => {
 	}
 });
 
-export default app;
+export default usersApi;
