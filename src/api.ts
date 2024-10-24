@@ -103,4 +103,52 @@ app.get('/users/:id/friends', async (c) => {
 	}
 });
 
+app.post('/users/:id/friends', async (c) => {
+	try {
+		type FriendPostBody = {
+			id: string
+		};
+
+		const db = database(c);
+
+		const body = await c.req.json();
+		const friendPost = body as FriendPostBody;
+
+		const userId = c.req.param('id') as string;
+		const friendId = friendPost.id;
+
+		var uid1, uid2: string;
+
+		if (friendId < userId) {
+			uid1 = friendId;
+			uid2 = userId;
+		} else if(userId < friendId) {
+			uid1 = userId;
+			uid2 = friendId;
+		} else {
+			return c.json(
+				{
+					error: "You may not befriend yourself.",
+				},
+				403
+			);
+		}
+
+		const result = await db.insert(friends).values({
+			user_id_1: uid1,
+			user_id_2: uid2,
+		});
+
+		return c.json({ result });
+	} catch (error) {
+		// @TODO breakdown potential exceptions
+		return c.json(
+			{
+				error,
+			},
+			500
+		);
+	}
+});
+
 export default app;
