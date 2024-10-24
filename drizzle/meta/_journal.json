@@ -8,6 +8,13 @@
       "when": 1729723756897,
       "tag": "0000_greedy_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1729798318464,
+      "tag": "0001_stale_alex_power",
+      "breakpoints": true
     }
   ]
 }
