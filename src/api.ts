@@ -37,21 +37,14 @@ app.get('/users', async (c) => {
 
 app.post('/users', async (c) => {
 	try {
-		type NewUser = typeof users.$inferInsert;
+		type UserPostBody = {
+			username: string
+		};
 
 		const db = database(c);
 		
 		const body = await c.req.json();
-		const user = body as NewUser;
-
-		if (user.id) {
-			return c.json(
-				{
-					"error": "Field not permitted",
-				},
-				403
-			);
-		}
+		const user = body as UserPostBody;
 
 		const result = await db.insert(users).values(user);
 
@@ -69,27 +62,27 @@ app.post('/users', async (c) => {
 
 app.get('/users/:id/friends', async (c) => {
 	try {
-		const user_id = c.req.param('id') as string;
+		const userId = c.req.param('id') as string;
 		
 		const db = database(c);
 
-		const friends_1 = db.select({
+		const friends1 = db.select({
 			id: users.id,
 			username: users.username
 		}).from(users).innerJoin(friends, eq(
 			users.id,
 			friends.userId1
-		)).where(eq(friends.userId2, user_id));
+		)).where(eq(friends.userId2, userId));
 
-		const friends_2 = db.select({
+		const friends2 = db.select({
 			id: users.id,
 			username: users.username
 		}).from(users).innerJoin(friends, eq(
 			users.id,
 			friends.userId2
-		)).where(eq(friends.userId1, user_id));
+		)).where(eq(friends.userId1, userId));
 
-		const result = await union(friends_1, friends_2);
+		const result = await union(friends1, friends2);
 
 		return c.json({ result });
 	} catch (error) {
@@ -135,8 +128,8 @@ app.post('/users/:id/friends', async (c) => {
 		}
 
 		const result = await db.insert(friends).values({
-			user_id_1: uid1,
-			user_id_2: uid2,
+			userId1: uid1,
+			userId2: uid2,
 		});
 
 		return c.json({ result });
