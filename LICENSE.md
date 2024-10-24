@@ -1,0 +1,1 @@
+This software is not currently licensed to any party under any license for any purpose.
