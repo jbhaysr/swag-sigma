@@ -1,4 +1,4 @@
-// src/index.ts
+// src/api.ts
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { Context, Hono } from 'hono';
