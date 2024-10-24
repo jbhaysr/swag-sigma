@@ -2,7 +2,9 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { Context, Hono } from 'hono';
-import { users } from './db/schema';
+import { friends, users } from './db/schema';
+import { union } from 'drizzle-orm/pg-core';
+import { eq } from 'drizzle-orm';
 
 export type Env = {
 	DATABASE_URL: string;
@@ -61,6 +63,42 @@ app.post('/users', async (c) => {
 				error,
 			},
 			400
+		);
+	}
+});
+
+app.get('/users/:id/friends', async (c) => {
+	try {
+		const user_id = c.req.param('id') as string;
+		
+		const db = database(c);
+
+		const friends_1 = db.select({
+			id: users.id,
+			username: users.username
+		}).from(users).innerJoin(friends, eq(
+			users.id,
+			friends.user_id_1
+		)).where(eq(friends.user_id_2, user_id));
+
+		const friends_2 = db.select({
+			id: users.id,
+			username: users.username
+		}).from(users).innerJoin(friends, eq(
+			users.id,
+			friends.user_id_2
+		)).where(eq(friends.user_id_1, user_id));
+
+		const result = await union(friends_1, friends_2);
+
+		return c.json({ result });
+	} catch (error) {
+		// @TODO breakdown potential exceptions
+		return c.json(
+			{
+				error,
+			},
+			500
 		);
 	}
 });
