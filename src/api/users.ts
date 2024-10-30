@@ -10,13 +10,24 @@ import { authorize } from '../helpers/auth';
 
 const usersApi = new Hono<{ Bindings: Env }>();
 
+const PAGE_SIZE = 5;
+
 usersApi.get('/', async (c) => {
 	try {
+		type UserGetBody = {
+			page: number,
+		};
+
+		const body = await c.req.json() as UserGetBody;
+
+		const page = body.page ? body.page : 1;
+
 		const db = database(c);
 		const result = await db.select({
 			id: users.id,
 			username: users.username
-		}).from(users);
+		}).from(users).orderBy(users.id)
+		.limit(PAGE_SIZE).offset((page-1)*PAGE_SIZE);
 
 		return c.json({ result });
 	} catch (error) {
@@ -31,9 +42,7 @@ usersApi.post('/', async (c) => {
 			username: string,
 			password: string,
 		};
-
-		const db = database(c);
-	
+		
 		const body = await c.req.json() as UserPostBody;
 		
 		const salt = genSaltSync(10);
@@ -43,6 +52,8 @@ usersApi.post('/', async (c) => {
 			username: body.username,
 			hash: hash as string
 		};
+
+		const db = database(c);
 
 		const result = await db.insert(users).values(user);
 
@@ -55,6 +66,14 @@ usersApi.post('/', async (c) => {
 
 usersApi.get('/:id/friends', async (c) => {
 	try {
+		type FriendsGetBody = {
+			page: number,
+		};
+
+		const body = await c.req.json() as FriendsGetBody;
+
+		const page = body.page ? body.page : 1;
+
 		const userId = c.req.param('id') as string;
 		
 		const db = database(c);
@@ -75,7 +94,9 @@ usersApi.get('/:id/friends', async (c) => {
 			friends.userId2
 		)).where(eq(friends.userId1, userId));
 
-		const result = await union(friends1, friends2);
+		const result = await union(friends1, friends2)
+		.orderBy(users.id).limit(PAGE_SIZE)
+		.offset((page-1)*PAGE_SIZE);
 
 		return c.json({ result });
 	} catch (error) {
@@ -91,19 +112,13 @@ usersApi.post('/:id/friends', async (c) => {
 			token: string,
 		};
 
-		const db = database(c);
-		
 		const body = await c.req.json() as FriendPostBody;
 		
 		const userId = c.req.param('id') as string;
 		const friendId = body.id;
-
-		if (!await authorize(c, userId)) {
-			return c.json({}, 401);
-		}
-
+		
 		var uid1, uid2: string;
-
+		
 		if (friendId < userId) {
 			uid1 = friendId;
 			uid2 = userId;
@@ -118,7 +133,13 @@ usersApi.post('/:id/friends', async (c) => {
 				403
 			);
 		}
-
+		
+		if (!await authorize(c, userId)) {
+			return c.json({}, 401);
+		}
+		
+		const db = database(c);
+		
 		const result = await db.insert(friends).values({
 			userId1: uid1,
 			userId2: uid2,
@@ -134,17 +155,12 @@ usersApi.post('/:id/friends', async (c) => {
 
 usersApi.delete('/:id/friends/:friendId', async (c) => {
 	try {
-		const db = database(c);
-
+		
 		const userId = c.req.param('id') as string;
 		const friendId = c.req.param('friendId') as string;
-
-		if (!await authorize(c, userId)) {
-			return c.json({}, 401);
-		}
-
+		
 		var uid1, uid2: string;
-
+		
 		if (friendId < userId) {
 			uid1 = friendId;
 			uid2 = userId;
@@ -159,7 +175,13 @@ usersApi.delete('/:id/friends/:friendId', async (c) => {
 				403
 			);
 		}
+		
+		if (!await authorize(c, userId)) {
+			return c.json({}, 401);
+		}
 
+		const db = database(c);
+		
 		const result = await db.delete(friends).where(and(
 			eq(friends.userId1, uid1),
 			eq(friends.userId2, uid2),
