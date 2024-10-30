@@ -1,62 +1,53 @@
 // src/api.ts
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { Context, Hono } from 'hono';
+import { Hono } from 'hono';
 import { friends, users } from '../db/schema';
 import { union } from 'drizzle-orm/pg-core';
 import { and, eq } from 'drizzle-orm';
-
-export type Env = {
-	DATABASE_URL: string;
-};
+import { genSaltSync, hashSync } from 'bcryptjs';
+import { database, Env } from '..';
 
 const usersApi = new Hono<{ Bindings: Env }>();
-
-const database = (c: Context) => {
-	const sql = neon(c.env.DATABASE_URL);
-	const db = drizzle(sql);
-	return db;
-}
 
 usersApi.get('/', async (c) => {
 	try {
 		const db = database(c);
-		const result = await db.select().from(users);
+		const result = await db.select({
+			id: users.id,
+			username: users.username
+		}).from(users);
 
 		return c.json({ result });
 	} catch (error) {
 		// @TODO breakdown potential exceptions
-		return c.json(
-			{
-				error,
-			},
-			500
-		);
+		return c.json({	error }, 500);
 	}
 });
 
 usersApi.post('/', async (c) => {
 	try {
 		type UserPostBody = {
-			username: string
+			username: string,
+			password: string,
 		};
 
 		const db = database(c);
+	
+		const body = await c.req.json() as UserPostBody;
 		
-		const body = await c.req.json();
-		const user = body as UserPostBody;
+		const salt = genSaltSync(10);
+		const hash = hashSync(body.password, salt);
+		
+		const user = {
+			username: body.username,
+			hash: hash as string
+		};
 
 		const result = await db.insert(users).values(user);
 
 		return c.json({ result });
 	} catch (error) {
 		// @TODO breakdown potential exceptions
-		return c.json(
-			{
-				error,
-			},
-			400
-		);
+		return c.json({	error }, 400);
 	}
 });
 
@@ -87,12 +78,7 @@ usersApi.get('/:id/friends', async (c) => {
 		return c.json({ result });
 	} catch (error) {
 		// @TODO breakdown potential exceptions
-		return c.json(
-			{
-				error,
-			},
-			500
-		);
+		return c.json({ error }, 500);
 	}
 });
 
@@ -104,11 +90,10 @@ usersApi.post('/:id/friends', async (c) => {
 
 		const db = database(c);
 
-		const body = await c.req.json();
-		const friendPost = body as FriendPostBody;
+		const body = await c.req.json() as FriendPostBody;
 
 		const userId = c.req.param('id') as string;
-		const friendId = friendPost.id;
+		const friendId = body.id;
 
 		var uid1, uid2: string;
 
@@ -135,12 +120,7 @@ usersApi.post('/:id/friends', async (c) => {
 		return c.json({ result });
 	} catch (error) {
 		// @TODO breakdown potential exceptions
-		return c.json(
-			{
-				error,
-			},
-			500
-		);
+		return c.json({ error }, 500);
 	}
 });
 
@@ -177,12 +157,7 @@ usersApi.delete('/:id/friends/:friendId', async (c) => {
 		return c.json({ result });
 	} catch (error) {
 		// @TODO breakdown potential exceptions
-		return c.json(
-			{
-				error,
-			},
-			500
-		);
+		return c.json({ error }, 500);
 	}
 });
 

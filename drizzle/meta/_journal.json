@@ -22,6 +22,20 @@
       "when": 1729798599970,
       "tag": "0002_boring_roxanne_simpson",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1729886747484,
+      "tag": "0003_fat_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1729889312095,
+      "tag": "0004_gifted_songbird",
+      "breakpoints": true
     }
   ]
 }
