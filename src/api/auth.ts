@@ -1,0 +1,51 @@
+import { Hono } from "hono";
+import { Env } from "..";
+import { users } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { compareSync } from "bcryptjs";
+import { sign } from "hono/utils/jwt/jwt";
+import { database } from "../helpers/database";
+
+const authApi = new Hono<{ Bindings: Env }>;
+
+authApi.post('/login', async (c) => {
+    try {
+        type LoginPostBody = {
+            username: string,
+            password: string,
+        };
+
+        const body = await c.req.json() as LoginPostBody;
+
+        const db = database(c);
+        const searchResult = await db.select().from(users).where(
+            eq(users.username, body.username)
+        );
+
+        if (searchResult.length != 1) {
+            return c.json({ error: "Invalid credentials." }, 403);
+        }
+
+        const user = searchResult[0];
+
+        if (!compareSync(body.password, user.hash)) {
+            return c.json({ error: "Invalid credentials." }, 403);
+        }
+
+        const now = Math.floor(Date.now() / 1000);
+        const tomorrow = now + 60 * 60 * 24;
+
+        const token = await sign({
+            id: user.id,
+            username: user.username,
+            iat: now,
+            exp: tomorrow,
+        }, c.env.JWT_SECRET_KEY);
+
+        return c.json({ token });
+    } catch (error) {
+        return c.json({ error }, 400);
+    }
+});
+
+export default authApi;

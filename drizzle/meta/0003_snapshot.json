@@ -1,0 +1,110 @@
+{
+  "id": "ccf48c87-298d-4b46-9664-08a545d5c8b9",
+  "prevId": "64b167f3-77c1-4023-8207-609debb4b68b",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.friends": {
+      "name": "friends",
+      "schema": "",
+      "columns": {
+        "user_id_1": {
+          "name": "user_id_1",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id_2": {
+          "name": "user_id_2",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "friends_user_id_1_users_id_fk": {
+          "name": "friends_user_id_1_users_id_fk",
+          "tableFrom": "friends",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id_1"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "friends_user_id_2_users_id_fk": {
+          "name": "friends_user_id_2_users_id_fk",
+          "tableFrom": "friends",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id_2"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "friends_user_id_1_user_id_2_pk": {
+          "name": "friends_user_id_1_user_id_2_pk",
+          "columns": [
+            "user_id_1",
+            "user_id_2"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "id_order_check": {
+          "name": "id_order_check",
+          "value": "\"friends\".\"user_id_1\" < \"friends\".\"user_id_2\""
+        }
+      }
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hash": {
+          "name": "hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

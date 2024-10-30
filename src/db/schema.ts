@@ -4,7 +4,8 @@ import { pgTable, uuid, text, primaryKey, check } from "drizzle-orm/pg-core";
 
 export const users = pgTable('users', {
     id: uuid('id').defaultRandom().primaryKey(),
-    username: text('username').notNull(),
+    username: text('username').notNull().unique(),
+    hash: text('hash').notNull()
 });
 
 export const friends = pgTable('friends', {
