@@ -4,7 +4,9 @@ import { friends, users } from '../db/schema';
 import { union } from 'drizzle-orm/pg-core';
 import { and, eq } from 'drizzle-orm';
 import { genSaltSync, hashSync } from 'bcryptjs';
-import { database, Env } from '..';
+import { Env } from '..';
+import { database } from '../helpers/database';
+import { authorize } from '../helpers/auth';
 
 const usersApi = new Hono<{ Bindings: Env }>();
 
@@ -85,15 +87,20 @@ usersApi.get('/:id/friends', async (c) => {
 usersApi.post('/:id/friends', async (c) => {
 	try {
 		type FriendPostBody = {
-			id: string
+			id: string,
+			token: string,
 		};
 
 		const db = database(c);
-
+		
 		const body = await c.req.json() as FriendPostBody;
-
+		
 		const userId = c.req.param('id') as string;
 		const friendId = body.id;
+
+		if (!await authorize(c, userId)) {
+			return c.json({}, 401);
+		}
 
 		var uid1, uid2: string;
 
@@ -131,6 +138,10 @@ usersApi.delete('/:id/friends/:friendId', async (c) => {
 
 		const userId = c.req.param('id') as string;
 		const friendId = c.req.param('friendId') as string;
+
+		if (!await authorize(c, userId)) {
+			return c.json({}, 401);
+		}
 
 		var uid1, uid2: string;
 

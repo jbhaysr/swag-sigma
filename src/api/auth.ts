@@ -1,9 +1,10 @@
 import { Hono } from "hono";
-import { database, Env } from "..";
+import { Env } from "..";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { compareSync } from "bcryptjs";
 import { sign } from "hono/utils/jwt/jwt";
+import { database } from "../helpers/database";
 
 const authApi = new Hono<{ Bindings: Env }>;
 
@@ -37,6 +38,7 @@ authApi.post('/login', async (c) => {
         const token = await sign({
             id: user.id,
             username: user.username,
+            iat: now,
             exp: tomorrow,
         }, c.env.JWT_SECRET_KEY);
 
