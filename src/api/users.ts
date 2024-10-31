@@ -36,26 +36,19 @@ usersApi.get('/', async (c) => {
 	}
 });
 
+
 usersApi.post('/', async (c) => {
-	try {
-		type UserPostBody = {
-			username: string,
-			password: string,
-		};
-		
-		const body = await c.req.json() as UserPostBody;
+	try {		
+		const { username, password } = await c.req.json();
 		
 		const salt = genSaltSync(10);
-		const hash = hashSync(body.password, salt);
-		
-		const user = {
-			username: body.username,
-			hash: hash as string
-		};
+		const hash = hashSync(password, salt);
 
 		const db = database(c);
 
-		const result = await db.insert(users).values(user);
+		const result = await db.insert(users).values({
+			username, hash
+		});
 
 		return c.json({ result });
 	} catch (error) {
