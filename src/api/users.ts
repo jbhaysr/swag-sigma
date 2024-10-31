@@ -57,23 +57,20 @@ usersApi.post('/', async (c) => {
 	}
 });
 
-export type UserDeleteBody = {
-	token: string,
-};
 usersApi.delete('/:id', async (c) => {
-	const userId = c.req.param('id') as string;
+	const { id } = c.req.param();
 
-	if (!await authorize(c, userId)) {
+	if (!await authorize(c, id)) {
 		return c.json({}, 401);
 	}
 
 	const db = database(c);
 	const result1 = await db.delete(friends).where(or(
-		eq(friends.userId1, userId),
-		eq(friends.userId2, userId)
+		eq(friends.userId1, id),
+		eq(friends.userId2, id)
 	));
 	const result2 = await db.delete(users).where(
-		eq(users.id, userId)
+		eq(users.id, id)
 	);
 
 	return c.json({result1, result2}, 200);
