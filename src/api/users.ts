@@ -145,30 +145,21 @@ usersApi.post('/:id/friends', async (c) => {
 
 usersApi.delete('/:id/friends/:friendId', async (c) => {
 	try {
-		
-		const userId = c.req.param('id') as string;
-		const friendId = c.req.param('friendId') as string;
+		const { id, friendId } = c.req.param();
 		
 		var uid1, uid2: string;
 		
-		if (friendId < userId) {
+		if (friendId < id) {
 			uid1 = friendId;
-			uid2 = userId;
-		} else if(userId < friendId) {
-			uid1 = userId;
+			uid2 = id;
+		} else if(id < friendId) {
+			uid1 = id;
 			uid2 = friendId;
 		} else {
-			return c.json(
-				{
-					error: "You may not befriend yourself.",
-				},
-				403
-			);
+			throw new HTTPException(403);
 		}
 		
-		if (!await authorize(c, userId)) {
-			return c.json({}, 401);
-		}
+		await authorize(c, id)
 
 		const db = database(c);
 		
