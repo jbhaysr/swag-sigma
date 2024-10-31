@@ -78,15 +78,8 @@ usersApi.delete('/:id', async (c) => {
 
 usersApi.get('/:id/friends', async (c) => {
 	try {
-		type FriendsGetBody = {
-			page: number,
-		};
-
-		const body = await c.req.json() as FriendsGetBody;
-
-		const page = body.page ? body.page : 1;
-
-		const userId = c.req.param('id') as string;
+		const { id } = c.req.param();
+		const page = parseInt(c.req.query('page') ?? "1");
 		
 		const db = database(c);
 
@@ -96,7 +89,7 @@ usersApi.get('/:id/friends', async (c) => {
 		}).from(users).innerJoin(friends, eq(
 			users.id,
 			friends.userId1
-		)).where(eq(friends.userId2, userId));
+		)).where(eq(friends.userId2, id));
 
 		const friends2 = db.select({
 			id: users.id,
@@ -104,7 +97,7 @@ usersApi.get('/:id/friends', async (c) => {
 		}).from(users).innerJoin(friends, eq(
 			users.id,
 			friends.userId2
-		)).where(eq(friends.userId1, userId));
+		)).where(eq(friends.userId1, id));
 
 		const result = await union(friends1, friends2)
 		.orderBy(users.id).limit(PAGE_SIZE)
