@@ -12,9 +12,6 @@ const usersApi = new Hono<{ Bindings: Env }>();
 
 export const PAGE_SIZE = 5;
 
-export type UsersGetBody = {
-	page: number,
-};
 export type UsersGetResponse = {
 	result: {
 		id: string,
@@ -23,10 +20,7 @@ export type UsersGetResponse = {
 };
 usersApi.get('/', async (c) => {
 	try {
-
-		const body = await c.req.json() as UsersGetBody;
-
-		const page = body.page ? body.page : 1;
+		const page = parseInt(c.req.query('page') ?? "1");
 
 		const db = database(c);
 		const result = await db.select({
