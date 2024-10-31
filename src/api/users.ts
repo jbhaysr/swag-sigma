@@ -7,14 +7,12 @@ import { genSaltSync, hashSync } from 'bcryptjs';
 import { Env } from '..';
 import { database } from '../helpers/database';
 import { authorize } from '../helpers/auth';
+import { HTTPException } from 'hono/http-exception';
 
 const usersApi = new Hono<{ Bindings: Env }>();
 
 export const PAGE_SIZE = 5;
 
-export type UsersGetBody = {
-	page: number,
-};
 export type UsersGetResponse = {
 	result: {
 		id: string,
@@ -23,10 +21,7 @@ export type UsersGetResponse = {
 };
 usersApi.get('/', async (c) => {
 	try {
-
-		const body = await c.req.json() as UsersGetBody;
-
-		const page = body.page ? body.page : 1;
+		const page = parseInt(c.req.query('page') ?? "1");
 
 		const db = database(c);
 		const result = await db.select({
@@ -42,26 +37,19 @@ usersApi.get('/', async (c) => {
 	}
 });
 
+
 usersApi.post('/', async (c) => {
-	try {
-		type UserPostBody = {
-			username: string,
-			password: string,
-		};
-		
-		const body = await c.req.json() as UserPostBody;
+	try {		
+		const { username, password } = await c.req.json();
 		
 		const salt = genSaltSync(10);
-		const hash = hashSync(body.password, salt);
-		
-		const user = {
-			username: body.username,
-			hash: hash as string
-		};
+		const hash = hashSync(password, salt);
 
 		const db = database(c);
 
-		const result = await db.insert(users).values(user);
+		const result = await db.insert(users).values({
+			username, hash
+		});
 
 		return c.json({ result });
 	} catch (error) {
@@ -70,23 +58,18 @@ usersApi.post('/', async (c) => {
 	}
 });
 
-export type UserDeleteBody = {
-	token: string,
-};
 usersApi.delete('/:id', async (c) => {
-	const userId = c.req.param('id') as string;
+	const { id } = c.req.param();
 
-	if (!await authorize(c, userId)) {
-		return c.json({}, 401);
-	}
+	await authorize(c, id);
 
 	const db = database(c);
 	const result1 = await db.delete(friends).where(or(
-		eq(friends.userId1, userId),
-		eq(friends.userId2, userId)
+		eq(friends.userId1, id),
+		eq(friends.userId2, id)
 	));
 	const result2 = await db.delete(users).where(
-		eq(users.id, userId)
+		eq(users.id, id)
 	);
 
 	return c.json({result1, result2}, 200);
@@ -94,15 +77,8 @@ usersApi.delete('/:id', async (c) => {
 
 usersApi.get('/:id/friends', async (c) => {
 	try {
-		type FriendsGetBody = {
-			page: number,
-		};
-
-		const body = await c.req.json() as FriendsGetBody;
-
-		const page = body.page ? body.page : 1;
-
-		const userId = c.req.param('id') as string;
+		const { id } = c.req.param();
+		const page = parseInt(c.req.query('page') ?? "1");
 		
 		const db = database(c);
 
@@ -112,7 +88,7 @@ usersApi.get('/:id/friends', async (c) => {
 		}).from(users).innerJoin(friends, eq(
 			users.id,
 			friends.userId1
-		)).where(eq(friends.userId2, userId));
+		)).where(eq(friends.userId2, id));
 
 		const friends2 = db.select({
 			id: users.id,
@@ -120,7 +96,7 @@ usersApi.get('/:id/friends', async (c) => {
 		}).from(users).innerJoin(friends, eq(
 			users.id,
 			friends.userId2
-		)).where(eq(friends.userId1, userId));
+		)).where(eq(friends.userId1, id));
 
 		const result = await union(friends1, friends2)
 		.orderBy(users.id).limit(PAGE_SIZE)
@@ -135,36 +111,22 @@ usersApi.get('/:id/friends', async (c) => {
 
 usersApi.post('/:id/friends', async (c) => {
 	try {
-		type FriendPostBody = {
-			id: string,
-			token: string,
-		};
-
-		const body = await c.req.json() as FriendPostBody;
-		
-		const userId = c.req.param('id') as string;
-		const friendId = body.id;
+		const { id } = c.req.param();
+		const { id: friendId } = await c.req.json();
 		
 		var uid1, uid2: string;
 		
-		if (friendId < userId) {
+		if (friendId < id) {
 			uid1 = friendId;
-			uid2 = userId;
-		} else if(userId < friendId) {
-			uid1 = userId;
+			uid2 = id;
+		} else if(id < friendId) {
+			uid1 = id;
 			uid2 = friendId;
 		} else {
-			return c.json(
-				{
-					error: "You may not befriend yourself.",
-				},
-				403
-			);
+			throw new HTTPException(403);
 		}
 		
-		if (!await authorize(c, userId)) {
-			return c.json({}, 401);
-		}
+		await authorize(c, id);
 		
 		const db = database(c);
 		
@@ -183,30 +145,21 @@ usersApi.post('/:id/friends', async (c) => {
 
 usersApi.delete('/:id/friends/:friendId', async (c) => {
 	try {
-		
-		const userId = c.req.param('id') as string;
-		const friendId = c.req.param('friendId') as string;
+		const { id, friendId } = c.req.param();
 		
 		var uid1, uid2: string;
 		
-		if (friendId < userId) {
+		if (friendId < id) {
 			uid1 = friendId;
-			uid2 = userId;
-		} else if(userId < friendId) {
-			uid1 = userId;
+			uid2 = id;
+		} else if(id < friendId) {
+			uid1 = id;
 			uid2 = friendId;
 		} else {
-			return c.json(
-				{
-					error: "You may not befriend yourself.",
-				},
-				403
-			);
+			throw new HTTPException(403);
 		}
 		
-		if (!await authorize(c, userId)) {
-			return c.json({}, 401);
-		}
+		await authorize(c, id)
 
 		const db = database(c);
 		

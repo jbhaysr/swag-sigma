@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { compareSync } from "bcryptjs";
 import { sign } from "hono/utils/jwt/jwt";
 import { database } from "../helpers/database";
+import { setCookie } from "hono/cookie";
 
 const authApi = new Hono<{ Bindings: Env }>;
 
@@ -12,10 +13,6 @@ export type LoginPostBody = {
     username: string,
     password: string,
 };
-
-export type LoginPostResponse = {
-    token: string,
-}
 
 authApi.post('/login', async (c) => {
     try {
@@ -46,7 +43,11 @@ authApi.post('/login', async (c) => {
             exp: tomorrow,
         }, c.env.JWT_SECRET_KEY);
 
-        return c.json({ token });
+        setCookie(c, 'token', token, {
+            expires: new Date(tomorrow)
+        });
+
+        return c.json({});
     } catch (error) {
         return c.json({ error }, 400);
     }
