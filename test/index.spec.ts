@@ -3,7 +3,6 @@ import { createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:
 import { describe, it, expect } from 'vitest';
 import worker from '../src/index';
 import { decode } from 'hono/utils/jwt/jwt';
-import { LoginPostResponse } from '../src/api/auth';
 
 export const testCreds = {
     username: 'testuser',
@@ -29,11 +28,13 @@ export const destroyTestUser = async () => {
 	});
 	const ctx = createExecutionContext();
 	const response = await worker.fetch(loginRequest, env, ctx);
-	const body = await response.json() as LoginPostResponse;
-	const payload = decode(body.token).payload;
-	const deleteRequest = new IncomingRequest('http://example.com/users/' + payload.id, {
+	const cookies = response.headers.getSetCookie();
+	const { id } = await response.json() as { id: number };
+	const headers = new Headers();
+	headers.append("Cookie", cookies[0]);
+	const deleteRequest = new IncomingRequest('http://example.com/users/' + id, {
 		method: 'DELETE',
-		body: JSON.stringify({token: body.token})
+		headers
 	});
 	worker.fetch(deleteRequest, env, ctx);
 	await waitOnExecutionContext(ctx);

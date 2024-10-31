@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import worker from "../../src/index";
 import { createExecutionContext, env, waitOnExecutionContext } from "cloudflare:test";
-import { LoginPostResponse } from "../../src/api/auth";
 import { decode } from "hono/utils/jwt/jwt";
 import { createTestUser, destroyTestUser, IncomingRequest, testCreds } from "../index.spec";
+import { parse } from "hono/utils/cookie";
 
 describe('Login Endpoint', () => {
     beforeAll(createTestUser);
@@ -16,8 +16,10 @@ describe('Login Endpoint', () => {
         const response = await worker.fetch(request, env, ctx);
         await waitOnExecutionContext(ctx);
         expect(response.status).toBe(200);
-        const body = await response.json() as LoginPostResponse;
-        const payload = decode(body.token).payload;
+        
+        const cookies = response.headers.getSetCookie();
+        const token = parse(cookies[0])['token'];
+        const payload = decode(token).payload;
         expect(payload.username).toBe(testCreds.username);
     });
     afterAll(destroyTestUser);
