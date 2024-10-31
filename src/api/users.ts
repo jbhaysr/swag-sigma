@@ -2,7 +2,7 @@
 import { Hono } from 'hono';
 import { friends, users } from '../db/schema';
 import { union } from 'drizzle-orm/pg-core';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 import { genSaltSync, hashSync } from 'bcryptjs';
 import { Env } from '..';
 import { database } from '../helpers/database';
@@ -62,6 +62,28 @@ usersApi.post('/', async (c) => {
 		// @TODO breakdown potential exceptions
 		return c.json({	error }, 400);
 	}
+});
+
+export type UserDeleteBody = {
+	token: string,
+};
+usersApi.delete('/:id', async (c) => {
+	const userId = c.req.param('id') as string;
+
+	if (!await authorize(c, userId)) {
+		return c.json({}, 401);
+	}
+
+	const db = database(c);
+	const result1 = await db.delete(friends).where(or(
+		eq(friends.userId1, userId),
+		eq(friends.userId2, userId)
+	));
+	const result2 = await db.delete(users).where(
+		eq(users.id, userId)
+	);
+
+	return c.json({result1, result2}, 200);
 });
 
 usersApi.get('/:id/friends', async (c) => {
