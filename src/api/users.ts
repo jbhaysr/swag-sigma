@@ -10,15 +10,21 @@ import { authorize } from '../helpers/auth';
 
 const usersApi = new Hono<{ Bindings: Env }>();
 
-const PAGE_SIZE = 5;
+export const PAGE_SIZE = 5;
 
+export type UsersGetBody = {
+	page: number,
+};
+export type UsersGetResponse = {
+	result: {
+		id: string,
+		username: string,
+	}[],
+};
 usersApi.get('/', async (c) => {
 	try {
-		type UserGetBody = {
-			page: number,
-		};
 
-		const body = await c.req.json() as UserGetBody;
+		const body = await c.req.json() as UsersGetBody;
 
 		const page = body.page ? body.page : 1;
 
