@@ -8,13 +8,17 @@ import { database } from "../helpers/database";
 
 const authApi = new Hono<{ Bindings: Env }>;
 
+export type LoginPostBody = {
+    username: string,
+    password: string,
+};
+
+export type LoginPostResponse = {
+    token: string,
+}
+
 authApi.post('/login', async (c) => {
     try {
-        type LoginPostBody = {
-            username: string,
-            password: string,
-        };
-
         const body = await c.req.json() as LoginPostBody;
 
         const db = database(c);
