@@ -37,18 +37,31 @@ npm run deploy
 9. Your worker will automatically redeploy and your instance will be usable after DNS propagation.
 
 ## API specification
+### `POST /auth/login`
+
+Body: `application/json`
+```json
+{
+    "username": "string",
+    "password": "string",
+}
+```
+Receive a cookie with a JWT.
+
 ### `POST /users`
 
 Body: `application/json`
 ```json
 {
-    "username": "string - The user's desired name."
+    "username": "string - The user's desired name.",
+    "password": "string - The user's desired password.",
 }
 ```
 Create a new user.
 
 ### `GET /users`
 
+Parameters: `page: number`
 Retrieve a list of all users.
 
 ### `POST /users/:id/friends`
@@ -56,13 +69,18 @@ Retrieve a list of all users.
 Body: `application/json`
 ```json
 {
-    "id": "UUID - The userId of the newly added friend."
+    "id": "UUID - The userId of the newly added friend.",
 }
 ```
+Requires authentication cookie as the user specified in the route.
 Add a friend to a user's friend list.
 
 ### `DELETE /users/:id/friends/:friendId`
+
+Requires authentication cookie as the FIRST user specified in the route.
 Remove a friend from a user's friend list.
 
 ### `GET /users/:id/friends`
+
+Parameters: `page: number`
 Retrieve a list of all friends for a given user.
