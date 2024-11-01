@@ -13,12 +13,6 @@ const usersApi = new Hono<{ Bindings: Env }>();
 
 export const PAGE_SIZE = 5;
 
-export type UsersGetResponse = {
-	result: {
-		id: string,
-		username: string,
-	}[],
-};
 usersApi.get('/', async (c) => {
 	try {
 		const page = parseInt(c.req.query('page') ?? "1");
