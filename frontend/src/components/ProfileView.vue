@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getFriends, getUser, removeFriend, User } from '../helpers/user';
+import { getFriends, getUser, removeFriend } from '../helpers/user';
 import FilteredUserList from './FilteredUserList.vue';
 import { store, UserTableButton } from '../store';
 
