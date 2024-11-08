@@ -33,7 +33,9 @@ authApi.post('/login', async (c) => {
             }, c.env.JWT_SECRET_KEY);
 
             setCookie(c, 'token', token, {
-                expires: new Date(tomorrow)
+                expires: new Date(tomorrow*1000),
+                secure: true,
+                sameSite: 'None',
             });
 
             const { id } = user;
