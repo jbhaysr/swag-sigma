@@ -41,13 +41,13 @@ getData()
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th v-if="button">{{ button.text }}</th>
+                    <th v-if="button?.text">{{ button.text }}</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="user in filteredList" :key="user.id">
                   <td><RouterLink :to="'/profiles/' + user.id">{{user.username}}</RouterLink></td>
-                  <td><button class="nes-btn is-success" v-if="button?.shouldDisplay(user)" @click="button.action(user)">{{ button.text }}</button></td>
+                  <td v-if="button?.shouldDisplay(user)"><button class="nes-btn is-success" @click="button.action(user)">{{ button.text }}</button></td>
                 </tr>
             </tbody>
         </table>
