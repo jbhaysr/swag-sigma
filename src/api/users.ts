@@ -11,7 +11,7 @@ import { HTTPException } from 'hono/http-exception';
 
 const usersApi = new Hono<{ Bindings: Env }>();
 
-export const PAGE_SIZE = 5;
+export const PAGE_SIZE = 50;
 
 usersApi.get('/', async (c) => {
 	try {

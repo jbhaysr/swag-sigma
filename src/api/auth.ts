@@ -7,8 +7,14 @@ import { sign } from "hono/utils/jwt/jwt";
 import { database } from "../helpers/database";
 import { setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
+import { cors } from "hono/cors";
 
 const authApi = new Hono<{ Bindings: Env }>;
+
+authApi.use('/login', cors({
+    origin: [ "https://swag-sigma.pages.dev", "https://dev.swag-sigma.pages.dev", "http://localhost:5173" ],
+    credentials: true
+}));
 
 authApi.post('/login', async (c) => {
     const { username, password } = await c.req.json();
@@ -33,7 +39,9 @@ authApi.post('/login', async (c) => {
             }, c.env.JWT_SECRET_KEY);
 
             setCookie(c, 'token', token, {
-                expires: new Date(tomorrow)
+                expires: new Date(tomorrow*1000),
+                secure: true,
+                sameSite: 'None',
             });
 
             const { id } = user;
