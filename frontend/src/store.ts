@@ -3,15 +3,21 @@ import Cookies from "js-cookie";
 import { User } from "./helpers/user";
 
 function getLoggedInUser (): User | undefined {
-    return JSON.parse(Cookies.get('userInfo') || '')
+    try {
+        return JSON.parse(Cookies.get('userInfo') || '')
+    } catch (err) {
+        return undefined
+    }
 }
 
 export const store = reactive({
     loggedInUser: getLoggedInUser(),
     login(user: User) {
         this.loggedInUser = user
+        Cookies.set('userInfo', JSON.stringify(user))
     },
     logout() {
         this.loggedInUser = undefined
+        Cookies.remove('userInfo')
     }
 })
