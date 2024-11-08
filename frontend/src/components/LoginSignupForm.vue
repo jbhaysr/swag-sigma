@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { authenticate, register, User } from '../helpers/user';
+import { authenticate, register } from '../helpers/user';
 import Cookies from 'js-cookie';
 
 const loggedInUser = ref('')
@@ -11,7 +11,7 @@ const password = ref('')
 function checkLoggedIn() {
     const userInfoCookie = Cookies.get('userInfo') || ''
     try {
-        const user = JSON.parse(userInfoCookie) as User
+        const user = JSON.parse(userInfoCookie)
         loggedInUser.value = user.username
     } catch (err) {
         loggedInUser.value = ''
