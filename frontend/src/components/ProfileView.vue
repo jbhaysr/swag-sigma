@@ -44,6 +44,6 @@ watch(() => store.loggedInUser?.id, getData)
 getData()
 </script>
 <template>
-    <h2>{{ username }}'s Friends:</h2>
-    <FilteredUserList :key="refresh" :dataSource="getFriendsList" :button="button" />
+    <h2 class="center">{{ username }}'s Friends:</h2>
+    <FilteredUserList class="center" :key="refresh" :dataSource="getFriendsList" :button="button" />
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { User } from '../helpers/user';
+import { store } from '../store';
 
 type State = {
     userList: [User] | []
@@ -37,9 +38,9 @@ getData()
 <template>
     <div class="root">
         <input type="text" placeholder="Filter Users" v-model="query" />
-        <button @click="reset">Reset</button>
+        <button class="nes-btn" @click="reset">Reset</button>
         <br/>
-        <table>
+        <table class="nes-table is-bordered is-centered">
             <thead>
                 <tr>
                     <th>Username</th>
@@ -49,9 +50,15 @@ getData()
             <tbody>
                 <tr v-for="user in filteredList" :key="user.id">
                   <td><RouterLink :to="'/profiles/' + user.id">{{user.username}}</RouterLink></td>
-                  <button v-if="button" @click="button.action(user)">{{ button.text }}</button>
+                  <button class="nes-btn is-success" v-if="button && user.id != store.loggedInUser?.id" @click="button.action(user)">{{ button.text }}</button>
                 </tr>
             </tbody>
         </table>
     </div>
 </template>
+<style scoped>
+input {
+    padding: 10px;
+    margin: 10px;
+}
+</style>
