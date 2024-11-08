@@ -1,14 +1,27 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import LoginSignupForm from './components/LoginSignupForm.vue'
 import { RouterView, RouterLink } from 'vue-router';
-</script>
+import { getStats } from './helpers/user';
 
+const users = ref(-1)
+const averageFriendsPerUser = ref(-1)
+
+async function getData() {
+  const { userCount, avgFriends } = await getStats()
+  users.value = userCount
+  averageFriendsPerUser.value = avgFriends
+}
+
+getData()
+</script>
 <template>
   <nav>
     <RouterLink to="/">Home</RouterLink>
     <LoginSignupForm />
   </nav>
   <RouterView />
+  <p v-if="users > 0">There are {{ users }} users with an average of {{ averageFriendsPerUser }} friends per user.</p>
 </template>
 
 <style scoped>
