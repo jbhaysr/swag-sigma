@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import LoginSignupForm from './components/LoginSignupForm.vue'
-import { RouterView } from 'vue-router';
+import { RouterView, RouterLink } from 'vue-router';
 </script>
 
 <template>
   <nav>
+    <RouterLink to="/">Home</RouterLink>
     <LoginSignupForm />
   </nav>
   <RouterView />

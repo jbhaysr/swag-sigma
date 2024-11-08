@@ -11,7 +11,8 @@ export type Env = {
 const app = new Hono();
 
 app.use('*', cors({
-    origin: [ "https://swag-sigma.pages.dev", "https://dev.swag-sigma.pages.dev", "http://localhost:5173" ]
+    origin: [ "https://swag-sigma.pages.dev", "https://dev.swag-sigma.pages.dev", "http://localhost:5173" ],
+    credentials: true
 }));
 app.route('/users', usersApi);
 app.route('/auth', authApi);

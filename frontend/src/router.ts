@@ -1,12 +1,14 @@
-import { createMemoryHistory, createRouter } from "vue-router";
-import UserList from "./components/UserList.vue";
+import { createWebHistory, createRouter } from "vue-router";
+import UserList from "./components/UserListView.vue";
+import ProfileView from "./components/ProfileView.vue";
 
 const routes = [
+    { path: '/profiles/:id', component: ProfileView },
     { path: '/', component: UserList },
 ]
 
 const router = createRouter({
-    history: createMemoryHistory(),
+    history: createWebHistory(),
     routes,
 })
 

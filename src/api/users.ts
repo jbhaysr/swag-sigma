@@ -31,7 +31,6 @@ usersApi.get('/', async (c) => {
 	}
 });
 
-
 usersApi.post('/', async (c) => {
 	try {		
 		const { username, password } = await c.req.json();
@@ -68,6 +67,18 @@ usersApi.delete('/:id', async (c) => {
 
 	return c.json({result1, result2}, 200);
 });
+
+usersApi.get('/:id', async (c) => {
+	const { id } = c.req.param();
+
+	const db = database(c);
+	const result = await db.select({
+		id: users.id,
+		username: users.username,
+	}).from(users).where(eq(users.id, id));
+
+	return c.json(result);
+})
 
 usersApi.get('/:id/friends', async (c) => {
 	try {
@@ -135,7 +146,6 @@ usersApi.post('/:id/friends', async (c) => {
 		return c.json({ error }, 500);
 	}
 });
-
 
 usersApi.delete('/:id/friends/:friendId', async (c) => {
 	try {
