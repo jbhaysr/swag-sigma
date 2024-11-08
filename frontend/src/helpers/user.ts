@@ -5,6 +5,11 @@ export const getUsers = async () => {
     .catch(err => console.log(err));
 }
 
+export type User = {
+    username: string,
+    id: string
+}
+
 // export const userList = [
 //     {
 //         username: 'Steve',

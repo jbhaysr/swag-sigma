@@ -1,8 +1,12 @@
-<script setup>
-    import { computed, reactive, ref } from 'vue';
-    import { getUsers } from '../helpers/user';
+<script setup lang="ts">
+    import { computed, reactive } from 'vue';
+    import { getUsers, User } from '../helpers/user';
 
-    const state = reactive({
+    type State = {
+        userList: [User] | []
+    };
+
+    const state: State = reactive({
         userList: []
     });
     
