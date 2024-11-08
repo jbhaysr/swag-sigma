@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import usersApi from "./api/users";
 import authApi from "./api/auth";
 import { cors } from "hono/cors";
+import statsApi from "./api/stats";
 
 export type Env = {
 	DATABASE_URL: string;
@@ -16,5 +17,6 @@ app.use('*', cors({
 }));
 app.route('/users', usersApi);
 app.route('/auth', authApi);
+app.route('/stats', statsApi);
 
 export default app;

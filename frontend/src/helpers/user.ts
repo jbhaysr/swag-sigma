@@ -55,6 +55,13 @@ export const removeFriend = async (user: User, friend: User) => {
     })
 }
 
+export const getStats = async () => {
+    return await fetch("https://swag-sigma.jbicks-haysr.workers.dev/stats", {
+        method: "GET"
+    }).then(response => response.json())
+    .catch(err => console.log(err))
+}
+
 export type User = {
     username: string,
     id: string
