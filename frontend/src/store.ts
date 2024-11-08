@@ -21,3 +21,9 @@ export const store = reactive({
         Cookies.remove('userInfo')
     }
 })
+
+export type UserTableButton = {
+    text: string,
+    action: (user: User) => void,
+    shouldDisplay: (user: User) => boolean,
+} | undefined

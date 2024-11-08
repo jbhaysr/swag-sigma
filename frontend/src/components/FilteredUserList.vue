@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { User } from '../helpers/user';
-import { store } from '../store';
+import { UserTableButton } from '../store';
 
 type State = {
     userList: [User] | []
@@ -13,10 +13,7 @@ const state = reactive<State>({
 
 const { dataSource, button } = defineProps<{
     dataSource: () => Promise<any>,
-    button?: {
-        text: string,
-        action: (user: User) => void
-    }
+    button?: UserTableButton
 }>()
 
 async function getData() {
@@ -50,7 +47,7 @@ getData()
             <tbody>
                 <tr v-for="user in filteredList" :key="user.id">
                   <td><RouterLink :to="'/profiles/' + user.id">{{user.username}}</RouterLink></td>
-                  <button class="nes-btn is-success" v-if="button && user.id != store.loggedInUser?.id" @click="button.action(user)">{{ button.text }}</button>
+                  <button class="nes-btn is-success" v-if="button?.shouldDisplay(user)" @click="button.action(user)">{{ button.text }}</button>
                 </tr>
             </tbody>
         </table>

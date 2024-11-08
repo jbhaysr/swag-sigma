@@ -3,17 +3,14 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getFriends, getUser, removeFriend, User } from '../helpers/user';
 import FilteredUserList from './FilteredUserList.vue';
-import { store } from '../store';
+import { store, UserTableButton } from '../store';
 
 const route = useRoute()
 var userId = route.params.id as string
 
 const refresh = ref(0)
 
-var button: {
-    text: string,
-    action: (user: User) => void
-} | undefined
+var button: UserTableButton
 
 const username = ref('')
 
@@ -27,7 +24,8 @@ async function getData() {
                     await removeFriend(store.loggedInUser, user)
                     refresh.value++
                 }
-            }
+            },
+            shouldDisplay: () => true,
         }
     } else { button = undefined }
     username.value = (await getUser(userId))[0].username

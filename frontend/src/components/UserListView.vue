@@ -1,27 +1,36 @@
 <script setup lang="ts">
 import FilteredUserList from './FilteredUserList.vue';
-import { addFriend, getUsers, User } from '../helpers/user';
-import { store } from '../store';
+import { addFriend, getFriends, getUsers, User } from '../helpers/user';
+import { store, UserTableButton } from '../store';
 import { ref, watch } from 'vue';
 
 const refresh = ref(0)
 
-function addFriendCallback(user: User) {
+async function addFriendCallback(user: User) {
   if(store.loggedInUser) {
-    addFriend(store.loggedInUser, user)
+    await addFriend(store.loggedInUser, user)
+    getData()
   }
 }
 
-var button: {
-    text: string,
-    action: (user: User) => void
-} | undefined
+var button: UserTableButton
+var friendsList: [User]
 
 async function getData() {
     if (store.loggedInUser) {
+        friendsList = (await getFriends(store.loggedInUser.id)).result
         button = {
             text: "Add Friend",
-            action: addFriendCallback
+            action: addFriendCallback,
+            shouldDisplay: (user) => {
+              if (user.id === store.loggedInUser?.id) {
+                return false
+              }
+              if (friendsList.some((friend) => friend.id === user.id)) {
+                return false
+              }
+              return true
+            }
         }
     } else { button = undefined }
     refresh.value++
