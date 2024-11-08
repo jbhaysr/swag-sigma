@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { authenticate, register, User } from '../helpers/user';
+import { authenticate, register } from '../helpers/user';
 import { RouterLink } from 'vue-router';
 import { store } from '../store';
 
