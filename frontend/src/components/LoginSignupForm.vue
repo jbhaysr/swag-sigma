@@ -19,14 +19,20 @@ async function signup() {
 
 </script>
 <template>
-    <div v-if="!store.loggedInUser">
+    <div class="right" v-if="!store.loggedInUser">
         <input type="text" placeholder="Username" v-model="username" />
         <input type="password" placeholder="Password" v-model="password" />
-        <button @click="login">Log In</button>
-        <button @click="signup">Sign Up</button>
+        <button class="nes-btn is-primary" @click="login">Log In</button>
+        <button class="nes-btn" @click="signup">Sign Up</button>
     </div>
     <div v-else>
-        <h2>Welcome, <RouterLink :to="'/profiles/' + store.loggedInUser.id">{{ store.loggedInUser.username }}</RouterLink></h2>
-        <button @click="store.logout">Log Out</button>
+        <button class="nes-btn right" @click="store.logout">Log Out</button>
+        <h3 class="center">Welcome, <RouterLink :to="'/profiles/' + store.loggedInUser.id">{{ store.loggedInUser.username }}</RouterLink></h3>
     </div>
 </template>
+<style scoped>
+input {
+    padding: 10px;
+    margin: 5px;
+}
+</style>

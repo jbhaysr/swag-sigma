@@ -16,25 +16,54 @@ async function getData() {
 getData()
 </script>
 <template>
-  <nav>
-    <RouterLink to="/">Home</RouterLink>
+  <header class="header row">
+    <RouterLink class="nes-btn left" to="/">Home</RouterLink>
     <LoginSignupForm />
-  </nav>
+  </header>
   <RouterView />
-  <p v-if="users > 0">There are {{ users }} users with an average of {{ averageFriendsPerUser }} friends per user.</p>
+  <p class="footer" v-if="users > 0">There are {{ users }} users with an average of {{ averageFriendsPerUser.toFixed(2) }} friends per user.</p>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+.header {
+  position: sticky;
+  top: 0;
+  padding: 20px;
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 2px solid #ccc;
+  z-index: 10;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.footer {
+  width: 100%;
+  text-align: center;
+  color: #999;
+  border-top: 2px solid #ccc;
+  margin-top: 10px;
+  background: #fff;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.row {
+  width: 100%;
+}
+
+.row::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.center {
+  margin: 0 auto;
+  width: max-content;
 }
 </style>
