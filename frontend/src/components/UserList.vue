@@ -10,8 +10,8 @@ function reset() {
 </script>
 
 <template>
-  <h2>Filter Users</h2>
-  <input type="text" placeholder="Filter Search" v-model="query" />
+  <h3>User List</h3>
+  <input type="text" placeholder="Filter Users" v-model="query" />
   <button @click="reset">Reset</button>
   <br/>
   <filtered-table :query="query" />
